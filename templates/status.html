@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Status Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #2d2d2d;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+        table {
+            width: 50%;
+            margin: 0 auto;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #444;
+        }
+        th {
+            background-color: #444;
+        }
+        td {
+            background-color: #333;
+        }
+        .online { color: #4CAF50; }
+        .offline { color: #F44336; }
+    </style>
+</head>
+<body>
+    <h1>Website Status Page</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Website</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for website, status in statuses.items() %}
+            <tr>
+                <td>{{ website }}</td>
+                <td class="{{ 'online' if status == 'Online' else 'offline' }}">{{ status }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

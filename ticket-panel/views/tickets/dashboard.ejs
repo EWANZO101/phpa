@@ -1,0 +1,6 @@
+<h1>Tickets Dashboard</h1>
+<ul>
+    <% tickets.forEach(ticket => { %>
+        <li><%= ticket.title %> - <%= ticket.description %></li>
+    <% }); %>
+</ul>

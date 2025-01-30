@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/flowbite@1.6.5/dist/flowbite.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.0.0/dist/tailwind.min.css" rel="stylesheet">
+    <title>Domain Setup</title>
+</head>
+<body class="bg-gray-900 flex justify-center items-center min-h-screen text-gray-200">
+    <div class="container bg-gray-800 p-8 rounded-lg shadow-lg max-w-md space-y-6">
+        <!-- Title Section -->
+        <h1 class="text-3xl font-extrabold text-center text-white mb-4">Check Domain Status</h1>
+        <p class="text-gray-400 text-center mb-6">
+            Enter your domain to check if it is protected by Cloudflare.
+        </p>
+
+        <!-- Domain Check Section -->
+        <form onsubmit="event.preventDefault(); checkCloudflare();">
+            <label for="domain" class="block text-gray-300 mb-2">Enter Domain:</label>
+            <input type="text" id="domain" name="domain" class="w-full p-2 rounded bg-gray-700 text-white" placeholder="example.com" required>
+            <button type="submit" class="mt-4 w-full bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-400 hover:to-blue-600 text-white font-bold py-2 px-4 rounded">
+                Check Domain
+            </button>
+        </form>
+        <p id="result" class="text-sm text-gray-300 mt-4"></p>
+    </div>
+
+    <script>
+        async function checkCloudflare() {
+            const domain = document.getElementById('domain').value;
+            const result = document.getElementById('result');
+
+            if (!domain) {
+                result.textContent = "Please enter a valid domain.";
+                return;
+            }
+
+            result.textContent = "Checking domain...";
+
+            try {
+                const response = await fetch('/check-cloudflare', { // Ensure this matches your Flask endpoint
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ domain })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                if (data.isCloudflare) {
+                    result.textContent = `✅ ${domain} is using Cloudflare. Redirecting...`;
+                    // Redirect to setupdomain page after 10 seconds
+                    setTimeout(() => {
+                        window.location.href = 'https://www.swiftpeakhosting.co.uk/checkdomain';
+                    }, 10000);
+                } else {
+                    result.textContent = `❌ ${domain} is NOT using Cloudflare. Redirecting...`;
+                    // Redirect to Cloudflare dashboard after 10 seconds
+                    setTimeout(() => {
+                        window.location.href = 'https://dash.cloudflare.com';
+                    }, 10000);
+                }
+            } catch (error) {
+                console.error('Error checking domain:', error);
+                result.textContent = "An error occurred while checking the domain. Please try again.";
+            }
+        }
+    </script>
+</body>
+</html>
+
