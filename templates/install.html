@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Installation Progress</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/1.6.3/flowbite.min.js"></script>
+</head>
+<body class="bg-gray-900 text-white flex items-center justify-center min-h-screen">
+    <div class="max-w-lg w-full p-6 bg-gray-800 rounded-lg shadow-lg">
+        <h1 class="text-2xl font-semibold text-center mb-4">Installation Progress</h1>
+        <div class="p-4 bg-gray-700 rounded-lg overflow-auto h-64">
+            <pre id="progress" class="text-sm"></pre>
+        </div>
+    </div>
+
+    <script>
+        const progressElement = document.getElementById("progress");
+        const eventSource = new EventSource("/install");
+
+        eventSource.onmessage = function(event) {
+            progressElement.textContent += event.data + "\n";
+            progressElement.scrollTop = progressElement.scrollHeight; // Auto-scroll
+        };
+
+        eventSource.addEventListener("redirect", function(event) {
+            window.location.href = event.data;
+        });
+    </script>
+</body>
+</html>
