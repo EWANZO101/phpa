@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Installation Successful</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/1.6.3/flowbite.min.js"></script>
+</head>
+<body class="bg-gray-900 text-white flex items-center justify-center h-screen">
+    <div class="max-w-lg w-full bg-gray-800 p-6 rounded-lg shadow-md">
+        <h1 class="text-2xl font-bold text-center mb-4">Installation Successful!</h1>
+        <p class="text-lg text-center">Your domain: <strong class="text-blue-400">{{ domain }}</strong></p>
+        <div class="mt-4">
+            <p class="font-semibold">Your URLs:</p>
+            <ul class="list-disc list-inside space-y-2 mt-2">
+                <li>
+                    <a href="https://{{ domain }}" target="_blank" class="text-blue-400 hover:underline">
+                        Client URL: https://{{ domain }}
+                    </a>
+                </li>
+                <li>
+                    <a href="https://api-cad.{{ domain }}/v1" target="_blank" class="text-blue-400 hover:underline">
+                        API URL: https://api-cad.{{ domain }}/v1
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <p class="mt-4 text-sm text-gray-300"><strong>Note:</strong> The first account created will receive full owner permissions.</p>
+    </div>
+</body>
+</html>
