@@ -16,6 +16,8 @@
             const responseMessage = document.getElementById("response-message");
 
             submitButton.disabled = true;
+            responseMessage.classList.add("hidden");
+            responseMessage.innerText = "";
 
             const formData = new FormData(event.target);
             const payload = {
@@ -30,22 +32,23 @@
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload),
             })
-            .then(response => {
-                if (!response.ok) {
-                    return response.json().then(data => Promise.reject(data));
-                }
-                return response.json();
-            })
-            .then(data => {
+            .then(response => response.json().then(data => ({ status: response.status, data })))
+            .then(({ status, data }) => {
                 responseMessage.classList.remove("hidden");
-                responseMessage.innerText = data.message;
-                responseMessage.classList.remove("text-red-500");
-                responseMessage.classList.add("text-green-500");
-                checkoutButton.classList.remove("hidden");
+
+                if (status === 200) {
+                    responseMessage.innerText = "✅ " + data.message;
+                    responseMessage.classList.add("text-green-500");
+                    checkoutButton.classList.remove("hidden"); // ✅ Show checkout button
+                } else {
+                    responseMessage.innerText = "❌ " + (data.error || "Submission failed.");
+                    responseMessage.classList.add("text-red-500");
+                    submitButton.disabled = false;
+                }
             })
             .catch(error => {
-                responseMessage.classList.remove("hidden");
-                responseMessage.innerText = error.error || "An unexpected error occurred.";
+                console.error("🚨 Fetch Error:", error);
+                responseMessage.innerText = "❌ Network Error: Failed to connect to the server.";
                 responseMessage.classList.add("text-red-500");
                 submitButton.disabled = false;
             });
@@ -54,6 +57,7 @@
         document.querySelector("form")?.addEventListener("submit", handleSubmit);
     });
 </script>
+
 
 </head>
 <body class="bg-gray-900 text-gray-200 min-h-screen flex flex-col items-center justify-center">
