@@ -11,17 +11,17 @@ DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1333569010272309258/zF_d
 def handle_form():
     message = None  # Default message
 
-    # Debugging: Clear session manually for testing
-    session.pop("form_submitted", None)
-
     if session.get("form_submitted"):
         message = "You have already submitted the form."
         return render_template("form.html", message=message)
 
     if request.method == "POST":
         try:
-            # Handle both JSON and form submissions
-            data = request.get_json() or request.form
+            # Handle both JSON & Form submissions correctly
+            if request.is_json:
+                data = request.get_json()
+            else:
+                data = request.form.to_dict()
 
             user_email = data.get("user_email")
             cad_domain = data.get("cad_domain")
@@ -45,22 +45,22 @@ def handle_form():
             # Debugging: Print payload before sending
             print("Sending payload to Discord:", payload)
 
-            # Send the message to the Discord webhook
+            # Send to Discord Webhook
             response = requests.post(DISCORD_WEBHOOK_URL, json=payload)
 
             # Debugging: Print response details
             print("Response Code:", response.status_code)
             print("Response Text:", response.text)
 
-            if response.status_code == 204:  # 204 means success in Discord webhooks
+            if response.status_code == 204:
                 message = "Information sent successfully!"
                 session["form_submitted"] = True  # Mark the form as submitted
             else:
-                message = f"Failed to send information. Error code: {response.status_code} - {response.text}"
+                message = f"Failed to send. Error: {response.status_code} - {response.text}"
 
         except Exception as e:
             message = f"An error occurred: {str(e)}"
-            print("Error:", e)  # Print error to console for debugging
+            print("Error:", e)
 
     return render_template("form.html", message=message)
 
