@@ -15,18 +15,25 @@ def show_form():
 @app.route("/", methods=["POST"])
 def handle_form():
     """ Handle form submission and send data to Discord """
-    if session.get("form_submitted"):
-        return jsonify({"message": "You have already submitted the form."}), 400  # Prevent resubmission
-
     try:
-        data = request.get_json() or request.form.to_dict()
+        print("Received POST request")
+
+        # Get request data (JSON or Form)
+        if request.is_json:
+            data = request.get_json()
+        else:
+            data = request.form.to_dict()
+
+        print("Received Data:", data)  # Debugging
+
         user_email = data.get("user_email")
         cad_domain = data.get("cad_domain")
         api_domain = data.get("api_domain")
         cloudflare_code = data.get("cloudflare_code")
 
         if not all([user_email, cad_domain, api_domain, cloudflare_code]):
-            return jsonify({"error": "All fields are required."}), 400  # Send error as JSON
+            print("Error: Missing fields")
+            return jsonify({"error": "All fields are required."}), 400
 
         # Format Webhook Message
         payload = {
@@ -38,17 +45,20 @@ def handle_form():
             )
         }
 
+        print("Sending payload to Discord:", payload)
+
         # Send data to Discord Webhook
         response = requests.post(DISCORD_WEBHOOK_URL, json=payload)
+        print("Discord Response Code:", response.status_code)
 
         if response.status_code == 204:
-            session["form_submitted"] = True  # Mark form as submitted
             return jsonify({"message": "Information sent successfully!"}), 200
         else:
-            return jsonify({"error": f"Failed to send. Error: {response.status_code}"}), 500
+            return jsonify({"error": f"Failed to send. Error: {response.status_code}, {response.text}"}), 500
 
     except Exception as e:
-        return jsonify({"error": str(e)}), 500  # Return JSON error message
+        print("Server Error:", str(e))
+        return jsonify({"error": f"Server error: {str(e)}"}), 500
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=5003)
