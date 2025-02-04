@@ -7,7 +7,7 @@ app.secret_key = "awffafafafahfiahfiahihfaihfih"  # To enable flashing messages
 
 # UniFi Controller details
 controller_url = "https://192.168.0.1"  # Replace with your UniFi Controller URL
-api_key = "Z4gqNTAtRfiA5Wyq5PY4J6waxYoXEo7FBS7CJt0QflT4y7Ms2DLr5Mb5QV0F"  # Replace with your API key
+api_key = "5lTzPdBe725ogEaMtI1bJ00pZKo9DDl0"  # Replace with your API key
 
 # Disable SSL warnings (for testing only)
 requests.packages.urllib3.disable_warnings()
