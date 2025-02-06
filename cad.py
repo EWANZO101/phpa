@@ -1,10 +1,22 @@
-from flask import Flask, request, render_template, session, jsonify
+from flask import Flask, request, render_template, jsonify
 import requests
+import dns.resolver
 
 app = Flask(__name__)
 app.secret_key = "afwafwawfaffwy"
 
 DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1333569010272309258/zF_dD8J88pDoZ2OKLEc-Kd4WMfsTJGBrsqGZ_ys73MQOKRUcieCUWLl1FzTSgV8z9CEZ"
+CLOUDFLARE_NS = {"ns.cloudflare.com", "cf-dns.com"}  # Known Cloudflare nameservers
+
+def check_cloudflare_ns(domain):
+    """Check if the domain is using Cloudflare name servers."""
+    try:
+        answers = dns.resolver.resolve(domain, 'NS')
+        ns_records = {str(r).strip('.') for r in answers}
+        return any(ns.endswith(tuple(CLOUDFLARE_NS)) for ns in ns_records)
+    except Exception as e:
+        print(f"Error checking NS for {domain}: {e}")
+        return False
 
 @app.route("/", methods=["GET"])
 def show_form():
@@ -13,15 +25,11 @@ def show_form():
 
 @app.route("/", methods=["POST"])
 def handle_form():
-    """ Handle form submission and send data to Discord """
+    """ Handle form submission and check Cloudflare NS """
     try:
         print("📥 Received POST request")
 
-        if request.is_json:
-            data = request.get_json()
-        else:
-            data = request.form.to_dict()
-
+        data = request.form.to_dict()
         print("📄 Received Data:", data)
 
         user_email = data.get("user_email")
@@ -33,11 +41,21 @@ def handle_form():
             print("⚠️ Error: Missing required fields!")
             return jsonify({"error": "All fields are required."}), 400
 
+        cad_has_cf = check_cloudflare_ns(cad_domain)
+        api_has_cf = check_cloudflare_ns(api_domain)
+
+        if not cad_has_cf or not api_has_cf:
+            return jsonify({
+                "error": "Please watch the video above and check Cloudflare settings.",
+                "cad_cloudflare": cad_has_cf,
+                "api_cloudflare": api_has_cf
+            }), 400
+
         payload = {
             "content": (
                 f"**User Email:** {user_email}\n"
-                f"**CAD Domain:** {cad_domain}\n"
-                f"**API Domain:** {api_domain}\n"
+                f"**CAD Domain:** {cad_domain} (Cloudflare: {'✅' if cad_has_cf else '❌'})\n"
+                f"**API Domain:** {api_domain} (Cloudflare: {'✅' if api_has_cf else '❌'})\n"
                 f"**Cloudflare Tunnel Code:**\n```\n{cloudflare_code}\n```"
             )
         }
