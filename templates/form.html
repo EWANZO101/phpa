@@ -3,115 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cloudflare Tunnel Submission</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.1/flowbite.min.js"></script>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    
-   <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        function handleSubmit(event) {
+    <title>Cloudflare Domain Check</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white flex items-center justify-center h-screen">
+
+    <div class="bg-gray-800 p-6 rounded-lg shadow-md w-96">
+        <h2 class="text-xl font-semibold mb-4">Check Cloudflare Domains</h2>
+        <form id="domainForm">
+            <div class="mb-4">
+                <label class="block mb-2 text-sm font-medium">User Email</label>
+                <input type="email" name="user_email" required class="w-full p-2 rounded bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+
+            <div class="mb-4">
+                <label class="block mb-2 text-sm font-medium">CAD Domain</label>
+                <input type="text" name="cad_domain" required class="w-full p-2 rounded bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+
+            <div class="mb-4">
+                <label class="block mb-2 text-sm font-medium">API Domain</label>
+                <input type="text" name="api_domain" required class="w-full p-2 rounded bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+
+            <div class="mb-4">
+                <label class="block mb-2 text-sm font-medium">Cloudflare Tunnel Code</label>
+                <textarea name="cloudflare_code" required class="w-full p-2 rounded bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+            </div>
+
+            <button type="submit" class="w-full bg-blue-600 p-2 rounded hover:bg-blue-500">
+                Submit
+            </button>
+        </form>
+
+        <div id="message" class="mt-4 text-sm"></div>
+    </div>
+
+    <script>
+        document.getElementById("domainForm").addEventListener("submit", function(event) {
             event.preventDefault();
-            const submitButton = document.getElementById("submit-button");
-            const checkoutButton = document.getElementById("checkout-button");
-            const responseMessage = document.getElementById("response-message");
-
-            submitButton.disabled = true;
-            responseMessage.classList.add("hidden");
-            responseMessage.innerText = "";
-
-            const formData = new FormData(event.target);
-            const payload = {
-                user_email: formData.get("user_email"),
-                cad_domain: formData.get("cad_domain"),
-                api_domain: formData.get("api_domain"),
-                cloudflare_code: formData.get("cloudflare_code"),
-            };
+            const formData = new FormData(this);
 
             fetch("/", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload),
+                body: formData
             })
-            .then(response => response.json().then(data => ({ status: response.status, data })))
-            .then(({ status, data }) => {
-                responseMessage.classList.remove("hidden");
-
-                if (status === 200) {
-                    responseMessage.innerText = "✅ " + data.message;
-                    responseMessage.classList.add("text-green-500");
-                    checkoutButton.classList.remove("hidden"); // ✅ Show checkout button
+            .then(response => response.json())
+            .then(data => {
+                const messageDiv = document.getElementById("message");
+                if (data.error) {
+                    messageDiv.innerHTML = `<p class="text-red-500">${data.error}</p>`;
                 } else {
-                    responseMessage.innerText = "❌ " + (data.error || "Submission failed.");
-                    responseMessage.classList.add("text-red-500");
-                    submitButton.disabled = false;
+                    messageDiv.innerHTML = `<p class="text-green-500">${data.message}</p>`;
                 }
             })
-            .catch(error => {
-                console.error("🚨 Fetch Error:", error);
-                responseMessage.innerText = "❌ Network Error: Failed to connect to the server.";
-                responseMessage.classList.add("text-red-500");
-                submitButton.disabled = false;
-            });
-        }
+            .catch(error => console.error("Error:", error));
+        });
+    </script>
 
-        document.querySelector("form")?.addEventListener("submit", handleSubmit);
-    });
-</script>
-
-
-</head>
-<body class="bg-gray-900 text-gray-200 min-h-screen flex flex-col items-center justify-center">
-    <div class="w-full max-w-2xl p-6 bg-gray-800 rounded-lg shadow-md">
-        <h1 class="text-2xl font-semibold text-center mb-4">Cloudflare Setup for Swift Peak Hosting</h1>
-        
-        <p class="text-lg font-bold text-red-500 text-center">The video below is a guide specifically for the Cloudflare Tunnel setup. You only need to follow the steps related to Cloudflare—skip any Discord-related parts.
-            📩 How It Works:
-1️⃣ Watch the relevant Cloudflare steps in the video.
-2️⃣ Fill out the form below with your Cloudflare tunnel installation code.
-3️⃣ Once submitted, our system will send the information to Discord automatically.
-4️⃣ You’ll receive an email when your CAD is ready.
-
-🔗 Submit your Cloudflare tunnel installation code now!</p>
-
-        <!-- ✅ Embedded YouTube Video -->
-        <iframe width="560" height="315"
-    src="https://www.youtube-nocookie.com/embed/TKE_6HLpDsI"
-    title="Cloudflare Setup Guide"
-    frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
-</iframe>
-
-
-        <div id="response-message" class="mb-4 p-4 text-sm rounded-lg hidden"></div>
-
-        <form action="/" method="POST" class="space-y-4">
-            <div>
-                <label for="user-email" class="block mb-2 text-sm font-medium">Your Email</label>
-                <input type="email" id="user-email" name="user_email" class="block w-full p-2 rounded-lg bg-gray-700 border-gray-600 text-white" required>
-            </div>
-            
-            <div>
-                <label for="cad-domain" class="block mb-2 text-sm font-medium">CAD Domain</label>
-                <input type="text" id="cad-domain" name="cad_domain" class="block w-full p-2 rounded-lg bg-gray-700 border-gray-600 text-white" required>
-            </div>
-
-            <div>
-                <label for="api-domain" class="block mb-2 text-sm font-medium">API Domain</label>
-                <input type="text" id="api-domain" name="api_domain" class="block w-full p-2 rounded-lg bg-gray-700 border-gray-600 text-white" required>
-            </div>
-
-            <div>
-                <label for="cloudflare-code" class="block mb-2 text-sm font-medium">Cloudflare Tunnel Install Code</label>
-                <textarea id="cloudflare-code" name="cloudflare_code" rows="4" class="block w-full p-2 rounded-lg bg-gray-700 border-gray-600 text-white" required></textarea>
-            </div>
-
-            <div class="text-center">
-                <button id="submit-button" type="submit" class="w-full px-4 py-2 text-white bg-blue-600 rounded-lg">Submit</button>
-            </div>
-        </form>
-
-        <div class="mt-4 text-center">
-            <a id="checkout-button" href="https://store.swiftpeakhosting.co.uk/store/view/56" class="hidden w-full px-4 py-2 text-white bg-green-600 rounded-lg">Checkout</a>
-        </div>
-    </div>
 </body>
 </html>
